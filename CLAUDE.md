@@ -23,6 +23,9 @@ conventions rather than inventing new ones.
 - **RLS owns access control.** The `links` table policy is `auth.uid() = user_id`. API
   routes use the user's anon-authed client — never the service-role key for user data.
 - Slugs are random base62, length 7 (`lib/slug.ts`); collisions retry on unique violation.
+- `/api/preview` (link thumbnails/titles) is auth-guarded via `requireUser` and SSRF-guarded
+  (blocks private/loopback hosts). It reads og:title/og:image from the target; falls back to a
+  free screenshot service then favicon. No DB writes — previews are fetched + cached, not stored.
 
 ## Supabase
 
