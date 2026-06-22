@@ -5,13 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Base origin used to build short links for display/copy (e.g. https://qori.click).
-// Falls back to the current origin in the browser when the env var is unset.
+// Canonical short-link domain shown in the dashboard. Uses NEXT_PUBLIC_SITE_URL
+// when set, otherwise defaults to the production domain — so links never render
+// as localhost just because the env var is missing or wrong.
 export function shortLinkBase(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) return configured.replace(/\/+$/, "");
-  if (typeof window !== "undefined") return window.location.origin;
-  return "";
+  return "https://qori.click";
 }
 
 export function formatRelativeTime(dateString: string | null) {
