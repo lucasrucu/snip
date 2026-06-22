@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, Loader2, Trash2 } from "lucide-react";
+import { Check, Copy, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatRelativeTime, shortLinkBase } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { formatRelativeTime, prettyFromUrl, shortLinkBase } from "@/lib/utils";
 import type { Link } from "@/lib/types";
 
 type Preview = {
@@ -51,7 +52,6 @@ function LinkThumb({
   fallbackDomain: string;
   loading: boolean;
 }) {
-  // Try og:image / screenshot first, then favicon, then a letter tile.
   const [failedIdx, setFailedIdx] = useState(0);
   const candidates = [preview?.image, preview?.favicon].filter(Boolean) as string[];
   const src = candidates[failedIdx];
@@ -93,18 +93,46 @@ function LinkRow({
   onDelete: (id: string) => void;
   deleting: boolean;
 }) {
+  const queryClient = useQueryClient();
   const { data: preview, isLoading } = useQuery({
     queryKey: ["preview", link.target_url],
     queryFn: () => fetchPreview(link.target_url),
     staleTime: 60 * 60 * 1000,
     retry: 1,
   });
+
   const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(link.label ?? "");
 
   const domain = preview?.domain ?? hostnameOf(link.target_url);
-  const title = preview?.title || domain;
+  // label (yours) -> real page title -> cleaned URL path -> domain
+  const auto = preview?.title || prettyFromUrl(link.target_url);
+  const displayTitle = link.label?.trim() || auto || domain;
   const shortUrl = `${base}/${link.slug}`;
   const shortDisplay = `${base.replace(/^https?:\/\//, "")}/${link.slug}`;
+
+  const rename = useMutation({
+    mutationFn: async (label: string) => {
+      const res = await fetch(`/api/links/${link.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? "Failed to rename");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      setEditing(false);
+      toast.success("Name updated");
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Failed to rename");
+    },
+  });
 
   async function copy() {
     await navigator.clipboard.writeText(shortUrl);
@@ -113,15 +141,65 @@ function LinkRow({
     setTimeout(() => setCopied(false), 1500);
   }
 
+  function startEdit() {
+    setDraft(link.label ?? "");
+    setEditing(true);
+  }
+
   return (
     <Card size="sm">
       <CardContent className="flex items-center gap-3">
         <LinkThumb preview={preview} fallbackDomain={domain} loading={isLoading} />
 
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium" title={title}>
-            {title}
-          </p>
+          {editing ? (
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                rename.mutate(draft.trim());
+              }}
+              className="flex items-center gap-1"
+            >
+              <Input
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder="Name this link"
+                className="h-7 flex-1"
+                autoFocus
+                maxLength={120}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") setEditing(false);
+                }}
+              />
+              <Button
+                type="submit"
+                size="icon-sm"
+                variant="ghost"
+                disabled={rename.isPending}
+                aria-label="Save name"
+              >
+                {rename.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Check className="size-3.5 text-primary" />
+                )}
+              </Button>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                onClick={() => setEditing(false)}
+                aria-label="Cancel"
+              >
+                <X className="size-3.5" />
+              </Button>
+            </form>
+          ) : (
+            <p className="truncate font-medium" title={displayTitle}>
+              {displayTitle}
+            </p>
+          )}
+
           <a
             href={shortUrl}
             target="_blank"
@@ -143,6 +221,16 @@ function LinkRow({
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          {!editing && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={startEdit}
+              aria-label="Rename link"
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon-sm"

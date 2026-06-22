@@ -12,14 +12,15 @@ import type { Link } from "@/lib/types";
 
 export function ShortenForm() {
   const [url, setUrl] = useState("");
+  const [label, setLabel] = useState("");
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (value: string) => {
+    mutationFn: async (input: { url: string; label: string }) => {
       const res = await fetch("/api/links", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: value }),
+        body: JSON.stringify(input),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -29,6 +30,7 @@ export function ShortenForm() {
     },
     onSuccess: () => {
       setUrl("");
+      setLabel("");
       queryClient.invalidateQueries({ queryKey: ["links"] });
       toast.success("Short link created");
     },
@@ -41,33 +43,43 @@ export function ShortenForm() {
     event.preventDefault();
     const value = url.trim();
     if (!value || mutation.isPending) return;
-    mutation.mutate(value);
+    mutation.mutate({ url: value, label: label.trim() });
   }
 
   return (
     <Card>
       <CardContent>
-        <form onSubmit={onSubmit} className="flex flex-col gap-2 sm:flex-row">
+        <form onSubmit={onSubmit} className="flex flex-col gap-2">
           <Input
             type="text"
             inputMode="url"
             placeholder="Paste a long URL…"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
-            className="h-9 flex-1"
+            className="h-9"
             autoFocus
           />
-          <Button
-            type="submit"
-            size="lg"
-            disabled={mutation.isPending || !url.trim()}
-          >
-            {mutation.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              "Shorten"
-            )}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              type="text"
+              placeholder="Optional name (e.g. Headphones for mom)"
+              value={label}
+              onChange={(event) => setLabel(event.target.value)}
+              className="h-9 flex-1"
+              maxLength={120}
+            />
+            <Button
+              type="submit"
+              size="lg"
+              disabled={mutation.isPending || !url.trim()}
+            >
+              {mutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                "Shorten"
+              )}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

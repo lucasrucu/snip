@@ -47,12 +47,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter a valid URL." }, { status: 400 });
   }
 
+  const rawLabel = typeof body?.label === "string" ? body.label.trim() : "";
+  const label = rawLabel ? rawLabel.slice(0, 120) : null;
+
   // Retry a few times in case a generated slug collides with an existing one.
   for (let attempt = 0; attempt < 5; attempt++) {
     const slug = generateSlug();
     const { data, error } = await supabase
       .from("links")
-      .insert({ slug, target_url: target, user_id: user.id })
+      .insert({ slug, target_url: target, user_id: user.id, label })
       .select()
       .single();
 

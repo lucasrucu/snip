@@ -14,6 +14,32 @@ export function shortLinkBase(): string {
   return "https://qori.click";
 }
 
+// Best-effort readable label derived from a URL's path, for when the page gives
+// us no title (e.g. Shopee/Tokopedia SPAs). Turns
+//   shopee.co.id/Headphone-Wireless-i.123.456  ->  "Headphone Wireless"
+// Returns null when the path has nothing human-readable to show.
+export function prettyFromUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    let seg = u.pathname.split("/").filter(Boolean).pop() ?? "";
+    seg = seg
+      .replace(/-i\.\d+\.\d+.*$/i, "") // strip Shopee "-i.shopid.itemid" tail
+      .replace(/\.(html?|php|aspx?|jsp)$/i, ""); // strip file extensions
+    try {
+      seg = decodeURIComponent(seg);
+    } catch {
+      // leave as-is if it isn't valid encoding
+    }
+    seg = seg.replace(/[-_+]+/g, " ").replace(/\s+/g, " ").trim();
+    // Reject opaque junk (ids, hashes) — require at least one real word.
+    if (seg.length < 3 || !/[a-z]{3,}/i.test(seg)) return null;
+    if (seg.length > 70) seg = `${seg.slice(0, 70).trim()}…`;
+    return seg;
+  } catch {
+    return null;
+  }
+}
+
 export function formatRelativeTime(dateString: string | null) {
   if (!dateString) {
     return "Never";
