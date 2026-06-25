@@ -2,15 +2,15 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Link2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
+import { QoriMark } from "@/components/QoriMark";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 
@@ -46,10 +46,9 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-md border-border bg-card">
       <CardHeader className="text-center">
-        <div className="mx-auto mb-1 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Link2 className="size-5" />
+        <div className="mx-auto mb-1 flex justify-center">
+          <QoriMark glyph="link" label="Snip" size={40} />
         </div>
-        <CardTitle className="text-lg">snip</CardTitle>
         <CardDescription>Sign in to shorten and manage your links</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

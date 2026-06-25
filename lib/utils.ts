@@ -11,7 +11,7 @@ export function cn(...inputs: ClassValue[]) {
 export function shortLinkBase(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) return configured.replace(/\/+$/, "");
-  return "https://qori.click";
+  return "https://links.qori.land";
 }
 
 // Best-effort readable label derived from a URL's path, for when the page gives

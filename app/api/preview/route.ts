@@ -100,7 +100,7 @@ export async function GET(request: Request) {
       redirect: "follow",
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; snip-link-preview/1.0; +https://qori.click)",
+          "Mozilla/5.0 (compatible; snip-link-preview/1.0; +https://links.qori.land)",
         Accept: "text/html,application/xhtml+xml",
       },
     });

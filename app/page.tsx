@@ -1,6 +1,8 @@
-import { redirect } from "next/navigation";
-
 import { Dashboard } from "@/components/Dashboard";
+import { FeatureHighlights } from "@/components/landing/FeatureHighlights";
+import { LandingFooter } from "@/components/landing/LandingFooter";
+import { LandingHero } from "@/components/landing/LandingHero";
+import { LandingNav } from "@/components/landing/LandingNav";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
@@ -10,7 +12,14 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    return (
+      <main>
+        <LandingNav />
+        <LandingHero />
+        <FeatureHighlights />
+        <LandingFooter />
+      </main>
+    );
   }
 
   return <Dashboard email={user.email ?? ""} />;
