@@ -19,8 +19,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "snip",
-  description: "A simple URL shortener.",
+  metadataBase: new URL("https://links.qori.land"),
+  title: "Snip",
+  description: "Short links, click tracking, yours.",
 };
 
 export default function RootLayout({
