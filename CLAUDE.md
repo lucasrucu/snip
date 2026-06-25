@@ -1,7 +1,7 @@
 # snip — project guide for Claude
 
 Personal URL shortener for Lucas. Sign in with Google → paste a URL → get a short
-`qori.click/<slug>` link. Short links are **public** (no account needed to use one);
+`links.qori.land/<slug>` link. Short links are **public** (no account needed to use one);
 only creating/managing links requires the owner's account.
 
 ## Stack

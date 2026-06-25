@@ -1,7 +1,7 @@
 # snip
 
 A simple personal URL shortener. Sign in with Google, paste a long URL, get a short
-`qori.click/abc123` link, and manage your links with click counts. Short links are
+`links.qori.land/abc123` link, and manage your links with click counts. Short links are
 public — anyone you share them with is redirected, no account needed.
 
 Styled after the [Financial Dashboard](../Financial-Dashboard) (same dark theme, Geist
@@ -13,7 +13,7 @@ fonts, and UI components).
 - Tailwind CSS + shadcn-style UI on `@base-ui/react`
 - Supabase — Google OAuth + Postgres (its own project, separate from the dashboard)
 - React Query, sonner, nanoid
-- Deploy: Vercel · domain: qori.click
+- Deploy: Vercel · domain: links.qori.land
 
 ## How it works
 
@@ -34,7 +34,7 @@ fonts, and UI components).
 3. Apply the schema in `supabase/migrations/0001_init.sql` (via the Supabase MCP or the
    SQL editor).
 4. Enable the Google provider in Supabase Auth and add the redirect URLs
-   (`http://localhost:3000/auth/callback`, `https://qori.click/auth/callback`).
+   (`http://localhost:3000/auth/callback`, `https://links.qori.land/auth/callback`).
 5. `npm run dev` → http://localhost:3000
 
 ## Database
